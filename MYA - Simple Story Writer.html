@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mya - Simple Story Writer</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .container-left {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+        }
+
+        .Input {
+            background-color: #202020;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ITP {
+            flex: 1;
+            border: 3px solid #202020;
+            padding: 10px;
+            background-color: #2d2d2d;
+            color: #fff;
+        }
+
+        .Output {
+            margin: 0;
+            background-color: #3d3d3d;
+            flex: 1;
+            padding: 10px;
+            color: #fff;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            /* Utilisation de la police Courier New pour l'aspect machine à écrire */
+        }
+
+        .Output[contenteditable] {
+            /* Ajout de styles pour l'élément éditable */
+            border: 2px solid #2d2d2d;
+            cursor: text;
+        }
+
+        .Output::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .Output::-webkit-scrollbar-thumb {
+            background-color: #272727;
+            border-radius: 6px;
+        }
+
+        .container-right {
+            background-color: #181818;
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #2d2d2d;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #fff;
+            color: #2d2d2d;
+        }
+
+        .button.active {
+            background-color: #fff;
+            color: #2d2d2d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-left">
+        <div class="Input">
+            <input class="ITP" name="InThePut" type="text" placeholder="Enter text" />
+        </div>
+        <!-- Ajout de l'attribut contenteditable à l'élément Output -->
+        <div class="Output" id="output" contenteditable></div>
+    </div>
+
+    <div class="container-right">
+        <button name="enter" class="button" onclick="addToOutput()">ENTER</button>
+        <button name="header" class="button" onclick="setMode(0)">Header</button>
+        <button name="action" class="button" onclick="setMode(1)">Action</button>
+        <button name="character" class="button" onclick="setMode(2)">Character</button>
+        <button name="dialogue" class="button" onclick="setMode(3)">Dialogue</button>
+        <button name="directions" class="button" onclick="setMode(4)">Directions</button>
+        <button name="transition" class="button" onclick="setMode(5)">Transition</button>
+        <button name="next" class="button" onclick="nextMode()">NEXT</button>
+	<p></p>
+        <button name="save" class="button" onclick="saveOutput()">Save</button>
+        <button name="load" class="button" onclick="loadOutput()">Load</button>
+        <button name="settings" class="button" onclick="changeFileName()">Settings</button>
+    </div>
+
+    <script type="text/javascript">
+var nameFile = "untilted_project.html";
+var mode = 0;
+setMode(0);
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        var focusedElement = document.activeElement;
+        if (focusedElement.tagName.toLowerCase() === 'button') {
+            event.preventDefault();
+        } else {
+            addToOutput();
+        }
+    } else if (event.key === 'Tab') {
+        var focusedElement = document.activeElement;
+        if (focusedElement.tagName.toLowerCase() !== 'button' || focusedElement.name !== 'next') {
+            event.preventDefault();
+            nextMode();
+        }
+    }
+});
+
+window.addEventListener('beforeunload', function(e) {
+    var confirmationMessage = "Certaines modifications n'ont pas été enregistrées. Êtes-vous sûr de vouloir quitter ?";
+    e.returnValue = confirmationMessage; // Standard pour la plupart des navigateurs
+    return confirmationMessage; // Pour certains navigateurs plus anciens
+});
+
+function addToOutput() {
+    var inputText = document.querySelector('.ITP').value.trim();
+    var currentOutput = document.getElementById('output').innerHTML;
+
+    if (inputText !== '') {
+        var resultString = currentOutput + applyStyles(inputText, mode) + '\n';
+        document.getElementById('output').innerHTML = resultString;
+        document.querySelector('.ITP').value = '';
+
+        switch (mode) {
+            case 0:
+                mode = 1;
+                break;
+            case 1:
+                mode = 0;
+                break;
+            case 2:
+                mode = 3;
+                break;
+            case 3:
+                mode = 1;
+                break;
+            case 4:
+                mode = 3;
+                break;
+            case 5:
+                mode = 0;
+                break;
+            default:
+                mode = 0;
+                break;
+        }
+
+        var buttons = document.querySelectorAll('.button');
+        buttons.forEach(function(button) {
+            button.classList.remove('active');
+        });
+        var activeButton = document.querySelector('[name="' + buttonName(mode) + '"]');
+        activeButton.classList.add('active');
+    } else {
+        if (mode == 1) {
+            mode = 0;
+            var buttons = document.querySelectorAll('.button');
+            buttons.forEach(function(button) {
+                button.classList.remove('active');
+            });
+            var activeButton = document.querySelector('[name="' + buttonName(mode) + '"]');
+            activeButton.classList.add('active');
+        }
+    }
+}
+
+function setMode(newMode) {
+    mode = newMode;
+    var buttons = document.querySelectorAll('.button');
+    buttons.forEach(function(button) {
+        button.classList.remove('active');
+    });
+    var activeButton = document.querySelector('[name="' + buttonName(mode) + '"]');
+    activeButton.classList.add('active');
+}
+
+function nextMode() {
+    switch (mode) {
+        case 0:
+            addToOutput();
+            mode = 1;
+            break;
+        case 1:
+            addToOutput();
+            mode = 2;
+            break;
+        case 2:
+            addToOutput();
+            mode = 4;
+            break;
+        case 3:
+            addToOutput();
+            mode = 1;
+            break;
+        case 4:
+            addToOutput();
+            mode = 3;
+            break;
+        case 5:
+            addToOutput();
+            mode = 0;
+            break;
+        default:
+            break;
+    }
+
+    var buttons = document.querySelectorAll('.button');
+    buttons.forEach(function(button) {
+        button.classList.remove('active');
+    });
+    var activeButton = document.querySelector('[name="' + buttonName(mode) + '"]');
+    activeButton.classList.add('active');
+}
+
+function buttonName(mode) {
+    switch (mode) {
+        case 0:
+            return 'header';
+        case 1:
+            return 'action';
+        case 2:
+            return 'character';
+        case 3:
+            return 'dialogue';
+        case 4:
+            return 'directions';
+        case 5:
+            return 'transition';
+        default:
+            return '';
+    }
+}
+
+function applyStyles(text, mode) {
+    switch (mode) {
+        case 0:
+            text = text
+                .replace(/ii/ig, 'INT.')
+                .replace(/ee/ig, 'EXT.')
+                .replace(/-JJ/ig, '- JOUR')
+                .replace(/-NN/ig, '- NUIT')
+                .replace(/-ss/ig, '- SOIR')
+                .replace(/-mm/ig, '- MATIN')
+                .replace(/-am/ig, '- APRèS MIDI')
+                .replace(/-md/ig, '- MIDI')
+                .replace(/-app/ig, '- après')
+                .replace(/-inap/ig, '- quelques instants après')
+                .replace(/-jap/ig, '- quelques jours après')
+                .replace(/-aap/ig, '- quelques années après')
+                .replace(/-map/ig, '- quelques mois après')
+                .replace(/-hap/ig, '- quelques heures après')
+                .replace(/-js/ig, '- Lendemain');
+            return '<div style="text-align: left; text-transform: uppercase; font-weight: bold;">' + text + '</div>';
+
+        case 1:
+            return '<div style="text-align: left;">' + text + '</div>';
+
+        case 2:
+            return '<div style="text-align: center; text-transform: uppercase; font-weight: bold; text-decoration: underline;">' + text + '</div>';
+
+        case 3:
+            return '<div style="text-align: center;">' + text + '</div>';
+
+        case 4:
+            if (!text.includes('(') && !text.includes(')')) {
+                text = '(' + text + ')';
+            } else if (text.includes('(') && !text.includes(')')) {
+                text = text + ')';
+            } else if (!text.includes('(') && text.includes(')')) {
+                text = '(' + text;
+            }
+            return '<div style="text-align: center; font-style: italic;">' + text + '</div>';
+
+        case 5:
+            text = text
+                .replace(/cc/ig, 'CUT')
+                .replace(/fi/ig, 'FADE IN')
+                .replace(/fo/ig, 'FADE OUT')
+                .replace(/fb/ig, 'FADE TO BLACK')
+                .replace(/ftb/ig, 'FADE TO BLACK')
+                .replace(/ff/ig, 'FLASH')
+                .replace(/ffb/ig, 'FLASH BACK')
+                .replace(/efb/ig, 'END FLASH BACK')
+                .replace(/bb/ig, 'BLUR');
+            return '<div style="text-align: right; text-transform: uppercase; font-weight: bold;">' + text + '</div>';
+
+        default:
+            return text;
+    }
+}
+
+function saveOutput(fileName) {
+    var outputContent = document.getElementById('output').innerHTML;
+    var blob = new Blob([outputContent], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName || nameFile;
+    a.click();
+}
+
+function loadOutput() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.html';
+
+    input.addEventListener('change', function () {
+        var file = input.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var content = e.target.result;
+                document.getElementById('output').innerHTML = content;
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    input.click();
+}
+
+function changeFileName() {
+    nameFile = prompt("Entrez le nouveau nom du projet :");
+    nameFile = nameFile + ".html"
+}
+
+    </script>
+
+</body>
+
+</html>
