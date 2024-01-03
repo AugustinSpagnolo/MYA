@@ -40,7 +40,6 @@
             color: #fff;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
-            /* Utilisation de la police Courier New pour l'aspect machine à écrire */
         }
 
         .Output[contenteditable] {
@@ -135,8 +134,8 @@ document.addEventListener('keydown', function(event) {
 
 window.addEventListener('beforeunload', function(e) {
     var confirmationMessage = "Certaines modifications n'ont pas été enregistrées. Êtes-vous sûr de vouloir quitter ?";
-    e.returnValue = confirmationMessage; // Standard pour la plupart des navigateurs
-    return confirmationMessage; // Pour certains navigateurs plus anciens
+    e.returnValue = confirmationMessage;
+    return confirmationMessage;
 });
 
 function addToOutput() {
